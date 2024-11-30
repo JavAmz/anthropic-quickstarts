@@ -93,9 +93,10 @@ async def sampling_loop(
         BashTool(),
         EditTool(),
     )
+    textpart = ' ' + system_prompt_suffix if system_prompt_suffix else ''
     system = BetaTextBlockParam(
         type="text",
-        text=f"{SYSTEM_PROMPT}{' ' + system_prompt_suffix if system_prompt_suffix else ''}",
+        text=f"{SYSTEM_PROMPT}{textpart}",
     )
 
     while True:
@@ -171,7 +172,6 @@ async def sampling_loop(
                     _make_api_tool_result(result, content_block["id"])
                 )
                 tool_output_callback(result, content_block["id"])
-
         if not tool_result_content:
             return messages
 
@@ -198,7 +198,8 @@ def _maybe_filter_to_n_most_recent_images(
             item
             for message in messages
             for item in (
-                message["content"] if isinstance(message["content"], list) else []
+                message["content"] if isinstance(
+                    message["content"], list) else []
             )
             if isinstance(item, dict) and item.get("type") == "tool_result"
         ],
@@ -267,11 +268,13 @@ def _make_api_tool_result(
     result: ToolResult, tool_use_id: str
 ) -> BetaToolResultBlockParam:
     """Convert an agent ToolResult to an API ToolResultBlockParam."""
-    tool_result_content: list[BetaTextBlockParam | BetaImageBlockParam] | str = []
+    tool_result_content: list[BetaTextBlockParam |
+                              BetaImageBlockParam] | str = []
     is_error = False
     if result.error:
         is_error = True
-        tool_result_content = _maybe_prepend_system_tool_result(result, result.error)
+        tool_result_content = _maybe_prepend_system_tool_result(
+            result, result.error)
     else:
         if result.output:
             tool_result_content.append(

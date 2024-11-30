@@ -1,7 +1,7 @@
 import asyncio
+import logging
 import os
 from contextlib import contextmanager
-from datetime import datetime
 from typing import Optional
 
 from anthropic.types.beta import BetaMessageParam
@@ -42,9 +42,6 @@ class State(BaseModel):
     only_n_most_recent_images: int = 3
     custom_system_prompt: str = ""
     in_sampling_loop: bool = False
-
-
-responses = {}
 
 
 # In-memory state to replace `st.session_state`
@@ -121,8 +118,7 @@ async def run_sampling_loop(chat_request: ChatRequest):
             messages=state.messages,
             output_callback=output_callback,
             tool_output_callback=store_tool_output,
-            api_response_callback=lambda request, response, error: store_api_response(
-                request, response, error),
+            api_response_callback=store_api_response,
             api_key=state.api_key,
             only_n_most_recent_images=chat_request.only_n_most_recent_images,
         )
@@ -139,10 +135,8 @@ def store_tool_output(tool_output: ToolResult, tool_id: str):
 
 
 def store_api_response(request, response, error):
-    response_id = datetime.now().isoformat()
-    responses[response_id] = (request, response)
     if error:
-        responses[response_id] = {"error": str(error)}
+        logging.error("Encountered error: ", error)
 
 # Endpoint to get the current state (for debugging or to see conversation history)
 
