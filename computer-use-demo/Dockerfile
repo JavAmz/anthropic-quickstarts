@@ -39,16 +39,9 @@ RUN apt-get update && \
     # Userland apps
     sudo add-apt-repository ppa:mozillateam/ppa && \
     sudo apt-get install -y --no-install-recommends \
-    libreoffice \
     firefox-esr \
     x11-apps \
-    xpdf \
-    gedit \
-    xpaint \
-    tint2 \
-    galculator \
-    pcmanfm \
-    unzip && \
+    tint2 && \
     apt-get clean
 
 # Install noVNC
@@ -101,4 +94,4 @@ ENV DISPLAY_NUM=$DISPLAY_NUM
 ENV HEIGHT=$HEIGHT
 ENV WIDTH=$WIDTH
 
-ENTRYPOINT [ "./entrypoint.sh" ]
+CMD [ "./entrypoint.sh" ]
